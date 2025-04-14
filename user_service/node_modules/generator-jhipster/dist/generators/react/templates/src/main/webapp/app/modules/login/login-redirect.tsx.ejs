@@ -1,0 +1,20 @@
+import React, { useEffect } from 'react';
+import { REDIRECT_URL } from 'app/shared/util/url-utils';
+import { useLocation } from 'react-router';
+
+export const LoginRedirect = () => {
+  const pageLocation = useLocation();
+
+  useEffect(() => {
+    localStorage.setItem(REDIRECT_URL, pageLocation.state.from.pathname);
+<%_ if (authenticationTypeOauth2) { _%>
+    window.location.href = '/oauth2/authorization/oidc';
+<%_ } else { _%>
+    window.location.reload();
+<%_ } _%>
+  });
+
+  return null;
+};
+
+export default LoginRedirect;

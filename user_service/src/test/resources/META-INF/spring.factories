@@ -1,0 +1,3 @@
+org.springframework.test.context.ContextCustomizerFactory = \
+    org.online.store.user.service.config.\
+    SqlTestContainersSpringContextCustomizerFactory

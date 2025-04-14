@@ -1,0 +1,179 @@
+<template>
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <form name="editForm" novalidate @submit.prevent="save()" >
+                <h2 id="<%= i18nKeyPrefix %>.home.createOrEditLabel" data-cy="<%= entityClass %>CreateUpdateHeading" v-text="t$('<%= i18nKeyPrefix %>.home.createOrEditLabel')">Create or edit a <%= entityAngularName %></h2>
+                <div>
+                    <div class="form-group" v-if="<%= entityInstance %>.<%= primaryKey.name %>">
+                        <label for="id" v-text="t$('global.field.id')"><%= primaryKey.nameCapitalized %></label>
+                        <input type="text" class="form-control" id="id" name="<%= primaryKey.name %>"
+                               v-model="<%= entityInstance %>.<%= primaryKey.name %>" readonly />
+                    </div>
+<%_ for (field of fields.filter(field => !field.id)) {
+  const fieldName = field.fieldName;
+  const fieldNameHumanized = field.fieldNameHumanized;
+  const fieldType = field.fieldType;
+  const fieldTypeBlobContent = field.fieldTypeBlobContent;
+  let fieldInputType = 'text';
+  let fieldInputClass = 'form-control';
+  const translationKey = `${i18nKeyPrefix}.${fieldName}`;
+  if (field.fieldTypeNumeric) {
+    fieldInputType = 'number';
+  } else if (field.fieldTypeLocalDate) {
+    fieldInputType = 'date';
+  } else if (field.fieldTypeTimed) {
+    fieldInputType = 'datetime-local';
+  } else if (field.fieldTypeLocalTime) {
+    fieldInputType = 'time';
+  } else if (field.fieldTypeBoolean) {
+    fieldInputType = 'checkbox';
+    fieldInputClass = 'form-check';
+  } else if (field.fieldTypeBinary && !field.blobContentTypeText) {
+    fieldInputType = 'hidden';
+  }
+_%>
+                    <div class="form-group">
+                        <label class="form-control-label" v-text="t$('<%= translationKey %>')" for="<%= entityFileName %>-<%= fieldName %>"><%= fieldNameHumanized %></label>
+  <%_ if (field.fieldIsEnum) { _%>
+                        <select class="form-control" name="<%= fieldName %>" :class="{'valid': !v$.<%= fieldName %>.$invalid, 'invalid': v$.<%= fieldName %>.$invalid }" v-model="v$.<%= fieldName %>.$model" id="<%= entityFileName %>-<%= fieldName %>" data-cy="<%= fieldName %>" <% if (field.fieldValidate === true && field.fieldValidateRules.includes('required')) { %> required<% } %>>
+    <%_ const enumPrefix = frontendAppName + '.'+ fieldType; _%>
+                            <option v-for="<%= this._.lowerFirst(fieldType) %> in <%= this._.lowerFirst(fieldType)%>Values" :key="<%= this._.lowerFirst(fieldType) %>" :value="<%= this._.lowerFirst(fieldType) %>" :label="t$('<%= enumPrefix %>.'+<%= this._.lowerFirst(fieldType) %>)">{{ <%= this._.lowerFirst(fieldType) %> }}</option>
+
+                        </select>
+  <%_ } else { _%>
+    <%_ if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+                        <div>
+      <%_ if (field.blobContentTypeImage) { _%>
+                            <img :src="'data:' + <%=entityInstance %>.<%=fieldName%>ContentType + ';base64,' + <%=entityInstance %>.<%=fieldName%>" style="max-height: 100px;" v-if="<%= entityInstance %>.<%= fieldName %>" alt="<%=entityInstance %>"/>
+      <%_ } _%>
+                            <div v-if="<%= entityInstance %>.<%= fieldName %>" class="form-text text-danger clearfix">
+      <%_ if (field.blobContentTypeAny) { _%>
+                                <a class="pull-left" @click="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>)" v-text="t$('entity.action.open')">open</a><br>
+                                <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
+      <%_ } else { _%>
+                                <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
+      <%_ } _%>
+      <%_ if (field.blobContentTypeImage) { _%>
+                                <button type="button" @click="clearInputImage('<%= fieldName %>', '<%= fieldName %>ContentType', 'file_<%= fieldName %>')" class="btn btn-secondary btn-xs pull-right">
+      <%_ } else { _%>
+                                <button type="button" @click="<%= entityInstance %>.<%= fieldName %>=null;<%= entityInstance %>.<%= fieldName %>ContentType=null;"
+                                        class="btn btn-secondary btn-xs pull-right">
+      <%_ } _%>
+                                    <font-awesome-icon icon="times"></font-awesome-icon>
+                                </button>
+                            </div>
+                            <label for="file_<%= fieldName %>" <% if (fieldTypeBlobContent === 'image') { %>v-text="t$('entity.action.addimage')"<% } else { %>v-text="t$('entity.action.addblob')"<% } %> class="btn btn-primary pull-right"></label>
+                            <input type="file" ref="file_<%= fieldName %>" id="file_<%= fieldName %>" style="display: none;" data-cy="<%= fieldName %>" @change="setFileData($event, <%= entityInstance %>, '<%= fieldName %>', <% if (fieldTypeBlobContent === 'image') { %>true)" accept="image/*"<% } else { %>false)"<% } %>/>
+                        </div>
+    <%_ } _%>
+    <%_ if (field.fieldTypeLocalDate) { _%>
+                        <b-input-group class="mb-3">
+                            <b-input-group-prepend>
+                                <b-form-datepicker
+                                    aria-controls="<%= entityFileName %>-<%= fieldName %>"
+                                    v-model="v$.<%= fieldName %>.$model"
+                                    name="<%= fieldName %>"
+                                    class="<%= fieldInputClass %>"
+                                    :locale="currentLanguage"
+                                    button-only
+                                    today-button
+                                    reset-button
+                                    close-button
+                                >
+                                </b-form-datepicker>
+                            </b-input-group-prepend>
+                            <b-form-input id="<%= entityFileName %>-<%= fieldName %>" data-cy="<%= fieldName %>" type="text" class="<%= fieldInputClass %>" name="<%= fieldName %>"  :class="{'valid': !v$.<%= fieldName %>.$invalid, 'invalid': v$.<%= fieldName %>.$invalid }"
+                            v-model="v$.<%= fieldName %>.$model" <% if (field.fieldValidate && field.fieldValidationRequired) { %> required<% } %> />
+                        </b-input-group>
+    <%_ } else if (field.fieldTypeInstant) { _%>
+                        <div class="d-flex">
+                            <input id="<%= entityFileName %>-<%= fieldName %>" data-cy="<%= fieldName %>" type="datetime-local" class="<%= fieldInputClass %>" name="<%= fieldName %>" :class="{'valid': !v$.<%= fieldName %>.$invalid, 'invalid': v$.<%= fieldName %>.$invalid }"
+                            <% if (field.fieldValidate && field.fieldValidationRequired) { %> required<% } %>
+                            :value="convertDateTimeFromServer(v$.<%= fieldName %>.$model)"
+                            @change="updateInstantField('<%= fieldName %>', $event)"/>
+                        </div>
+    <%_ } else if (field.fieldTypeZonedDateTime) { _%>
+                        <div class="d-flex">
+                            <input id="<%= entityFileName %>-<%= fieldName %>" data-cy="<%= fieldName %>" type="datetime-local" class="<%= fieldInputClass %>" name="<%= fieldName %>" :class="{'valid': !v$.<%= fieldName %>.$invalid, 'invalid': v$.<%= fieldName %>.$invalid }"
+                            <% if (field.fieldValidate && field.fieldValidationRequired) { %> required<% } %>
+                            :value="convertDateTimeFromServer(v$.<%= fieldName %>.$model)"
+                            @change="updateZonedDateTimeField('<%= fieldName %>', $event)"/>
+                        </div>
+    <%_ } else if (field.blobContentTypeText) { _%>
+                        <textarea class="<%= fieldInputClass %>" name="<%= fieldName %>" id="<%= entityFileName %>-<%= fieldName %>" data-cy="<%= fieldName %>"
+                            :class="{'valid': !v$.<%= fieldName %>.$invalid, 'invalid': v$.<%= fieldName %>.$invalid }" v-model="v$.<%= fieldName %>.$model" <% if (field.fieldValidate === true && field.fieldValidateRules.includes('required')) { %> required<% } %>></textarea>
+    <%_ } else { _%>
+                        <input type="<%= fieldInputType %>" class="<%= fieldInputClass %>" name="<%= fieldName %>" id="<%= entityFileName %>-<%= fieldName %>" data-cy="<%= fieldName %>"
+                            :class="{'valid': !v$.<%= fieldName %>.$invalid, 'invalid': v$.<%= fieldName %>.$invalid }" v-model<% if (fieldInputType === 'number') { %>.number<% } %>="v$.<%= fieldName %>.$model" <% if (field.fieldValidate === true && field.fieldValidateRules.includes('required')) { %> required<% } %>/>
+      <%_ if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+                        <input type="hidden" class="<%= fieldInputClass %>" name="<%= fieldName %>ContentType" id="<%= entityFileName %>-<%= fieldName %>ContentType"
+                            v-model="<%= entityInstance %>.<%= fieldName %>ContentType" />
+      <%_ } _%>
+    <%_ } _%>
+  <%_ } _%>
+  <%_ if (field.fieldValidate) { _%>
+                        <div v-if="v$.<%= fieldName %>.$anyDirty && v$.<%= fieldName %>.$invalid">
+                            <small
+                               class="form-text text-danger"
+                               v-for="error of v$.<%= fieldName %>.$errors"
+                               :key="error.$uid"
+                            >{{ error.$message }}</small>
+                        </div>
+  <%_ } _%>
+                    </div>
+<%_ } _%>
+<%_ for (relationship of relationships.filter(rel => !rel.otherEntity.embedded)) {
+  const otherEntityName = relationship.otherEntityName;
+  const otherEntityNamePlural = relationship.otherEntityNamePlural;
+  const relationshipName = relationship.relationshipName;
+  const relationshipNameHumanized = relationship.relationshipNameHumanized;
+  const relationshipFieldName = relationship.relationshipFieldName;
+  const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
+  const otherEntityField = relationship.otherEntityField;
+  const relationshipRequired = relationship.relationshipRequired;
+  const translationKey = `${i18nKeyPrefix}.${relationshipName}`; _%>
+  <%_ if (!relationship.collection && relationship.persistableRelationship) { _%>
+                    <div class="form-group">
+                        <label class="form-control-label" v-text="t$('<%= translationKey %>')" for="<%= entityFileName %>-<%= relationshipName %>"><%= relationshipNameHumanized %></label>
+                        <select class="form-control" id="<%= entityFileName %>-<%= relationshipName %>" data-cy="<%= relationshipFieldName %>" name="<%= relationshipName %>" v-model="<%= entityInstance %>.<%=relationshipFieldName %>"<% if (relationshipRequired) { %> required<% } %>>
+    <%_ if (!relationshipRequired) { _%>
+                            <option :value="null"></option>
+    <%_ } else { _%>
+                            <option v-if="!<%= entityInstance %>.<%= relationshipName %>" :value="null" selected></option>
+    <%_ } _%>
+                            <option :value="<%= entityInstance %>.<%=relationshipFieldName %> && <%=otherEntityName %>Option.<%= relationship.otherEntity.primaryKey.name %> === <%= entityInstance %>.<%=relationshipFieldName %>.<%= relationship.otherEntity.primaryKey.name %> ? <%= entityInstance %>.<%=relationshipFieldName %> : <%=otherEntityName %>Option" v-for="<%=otherEntityName %>Option in <%=otherEntityNamePlural %>" :key="<%=otherEntityName %>Option.<%= relationship.otherEntity.primaryKey.name %>">{{<%=otherEntityName %>Option.<%=otherEntityField %>}}</option>
+                        </select>
+                    </div>
+  <%_ } else if (relationship.persistableRelationship) { _%>
+                    <div class="form-group">
+                        <label v-text="t$('<%= translationKey %>')" for="<%= entityFileName %>-<%= relationshipName %>"><%= relationshipNameHumanized %></label>
+                        <select class="form-control" id="<%= entityFileName %>-<%= relationshipFieldNamePlural %>" data-cy="<%= relationshipFieldName %>" multiple name="<%= relationshipName %>" v-if="<%=entityInstance %>.<%=relationshipFieldNamePlural %> !== undefined" v-model="<%=entityInstance %>.<%=relationshipFieldNamePlural %>"<% if (relationshipRequired) { %> required<% } %>>
+                            <option :value="getSelected(<%=entityInstance %>.<%=relationshipFieldNamePlural %>, <%=otherEntityName %>Option, '<%= relationship.otherEntity.primaryKey.name %>')" v-for="<%=otherEntityName %>Option in <%=otherEntityNamePlural %>" :key="<%=otherEntityName %>Option.<%= relationship.otherEntity.primaryKey.name %>">{{<%=otherEntityName %>Option.<%=otherEntityField %>}}</option>
+                        </select>
+                    </div>
+  <%_ } _%>
+  <%_ if (relationship.relationshipValidate) { _%>
+                    <div v-if="v$.<%= relationship.collection ? relationshipFieldNamePlural : relationshipFieldName %>.$anyDirty && v$.<%= relationship.collection ? relationshipFieldNamePlural : relationshipFieldName %>.$invalid">
+                        <small
+                           class="form-text text-danger"
+                           v-for="error of v$.<%= relationship.collection ? relationshipFieldNamePlural : relationshipFieldName %>.$errors"
+                           :key="error.$uid"
+                        >{{ error.$message }}</small>
+                    </div>
+  <%_ } _%>
+<%_ } _%>
+                </div>
+                <div>
+                    <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" @click="previousState()">
+                        <font-awesome-icon icon="ban"></font-awesome-icon>&nbsp;<span v-text="t$('entity.action.cancel')">Cancel</span>
+                    </button>
+                    <button type="submit" id="save-entity" data-cy="entityCreateSaveButton" :disabled="v$.$invalid || isSaving" class="btn btn-primary">
+                        <font-awesome-icon icon="save"></font-awesome-icon>&nbsp;<span v-text="t$('entity.action.save')">Save</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
+<script lang="ts" src="./<%= entityFileName %>-update.component.ts">
+</script>

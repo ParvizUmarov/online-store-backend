@@ -1,0 +1,254 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+package <%= packageName %>.web.rest;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import <%= packageName %>.IntegrationTest;
+<%_ if (databaseTypeSql && reactive) { _%>
+import <%= packageName %>.config.Constants;
+<%_ } _%>
+<%_ if (authenticationTypeOauth2) { _%>
+import <%= packageName %>.config.TestSecurityConfiguration;
+<%_ } _%>
+import <%= user.entityAbsoluteClass %>;
+import <%= packageName %>.repository.UserRepository;
+<%_ if (!requiresDeleteAllUsers) { _%>
+import <%= packageName %>.service.UserService;
+<%_ } _%>
+<%_ if (searchEngineElasticsearch) { _%>
+import <%= packageName %>.repository.search.UserSearchRepository;
+<%_ } _%>
+import <%= packageName %>.security.AuthoritiesConstants;
+<%_ if (databaseTypeSql && reactive) { _%>
+import <%= packageName %>.repository.EntityManager;
+<%_ } _%>
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+<%_ if (reactive) { _%>
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+<%_ } else { _%>
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+<%_ } _%>
+<%_ if (cacheProviderAny) { _%>
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.Cache;
+import java.util.Objects;
+<%_ } _%>
+<%_ if (cacheProviderMemcached) { _%>
+import org.springframework.cache.support.NoOpCacheManager;
+<%_ } _%>
+import org.springframework.http.MediaType;
+<%_ if (databaseTypeCouchbase) { _%>
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.TestSecurityContextHolder;
+<%_ } _%>
+import org.springframework.security.test.context.support.WithMockUser;
+<%_ if (reactive) { _%>
+import <%= packageName %>.service.dto.<%= user.dtoClass %>;
+import org.springframework.test.web.reactive.server.WebTestClient;
+<%_ } else { _%>
+import org.springframework.test.web.servlet.MockMvc;
+<%_ } _%>
+<%_ if (databaseTypeSql && !reactive) { _%>
+import org.springframework.transaction.annotation.Transactional;
+<%_ } _%>
+<%_ if (reactive && searchEngineElasticsearch) { _%>
+import reactor.core.publisher.Mono;
+<%_ } _%>
+
+<%_ if (databaseTypeCassandra || databaseTypeCouchbase) { _%>
+import java.util.stream.Stream;
+<%_ } _%>
+<%_ if (databaseTypeCassandra) { _%>
+import java.util.UUID;
+<%_ } _%>
+import java.util.Set;
+
+<%_ if (reactive && searchEngineElasticsearch) { _%>
+import static org.mockito.Mockito.*;
+<%_ } _%>
+<%_ if (reactive && authenticationUsesCsrf) { _%>
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
+<%_ } else if (!reactive) { _%>
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+<%_ } _%>
+
+/**
+ * Integration tests for the {@link PublicUserResource} REST controller.
+ */
+<%_ if (reactive) { _%>
+@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_TIMEOUT)
+<%_ } else { _%>
+@AutoConfigureMockMvc
+<%_ } _%>
+@WithMockUser(authorities = AuthoritiesConstants.ADMIN)
+@IntegrationTest
+class PublicUserResourceIT {
+
+<%_ const DEFAULT_USER = {firstName: 'john', lastName: 'doe'}; _%>
+<%_ for (field of user.fields.filter(field => !field.builtIn && field.relatedByOtherEntity)) { _%>
+    private static final String DEFAULT_<%= field.fieldName.toUpperCase() %> = "<%= DEFAULT_USER [field.fieldName] %>";
+<%_ } _%>
+
+    @Autowired
+    private UserRepository userRepository;
+<%_ if (!requiresDeleteAllUsers) { _%>
+
+    @Autowired
+    private UserService userService;
+<%_ } _%>
+<%_ if (searchEngineElasticsearch) { _%>
+
+    /**
+     * This repository is mocked in the <%= packageName %>.repository.search test package.
+     *
+     * @see <%= packageName %>.repository.search.UserSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private UserSearchRepository mockUserSearchRepository;
+<%_ } _%>
+<%_ if (cacheProviderAny) { _%>
+
+    @Autowired
+    private CacheManager cacheManager;
+<%_ } _%>
+
+    @Autowired
+<%_ if (reactive) { _%>
+    private WebTestClient webTestClient;
+
+<%_ } else { _%>
+    private MockMvc restUserMockMvc;
+
+<%_ } _%>
+    private <%= user.persistClass %> user;
+<%_ if (!databaseTypeCassandra && !requiresDeleteAllUsers) { _%>
+    private Long numberOfUsers;
+
+    @BeforeEach
+    void countUsers() {
+        numberOfUsers = userRepository.count()<%- reactorBlock %>;
+    }
+
+<%_ } _%>
+<%_ if (reactive && authenticationUsesCsrf) { _%>
+    @BeforeEach
+    void setupCsrf() {
+        webTestClient = webTestClient.mutateWith(csrf());
+    }
+
+<%_ } _%>
+    @BeforeEach
+    void initTest() {
+        user = UserResourceIT.initTestUser();
+    }
+
+    @AfterEach
+    void cleanupAndCheck() {
+<%_ if (cacheProviderAny) { _%>
+        cacheManager.getCacheNames().stream()
+            .map(cacheName -> this.cacheManager.getCache(cacheName))
+            .filter(Objects::nonNull)
+            .forEach(Cache::clear);
+<%_ } _%>
+<%_ if (requiresDeleteAllUsers) { _%>
+  <%_ if (databaseTypeSql && reactive) { _%>
+        userRepository.deleteAllUserAuthorities()<%- reactorBlock %>;
+  <%_ } _%>
+        userRepository.deleteAll()<%- reactorBlock %>;
+<%_ } else { _%>
+        userService.deleteUser(user.getLogin())<%- reactorBlock %>;
+<%_ } _%>
+<%_ if (!databaseTypeCassandra && !requiresDeleteAllUsers) { _%>
+        assertThat(userRepository.count()<%- reactorBlock %>).isEqualTo(numberOfUsers);
+        numberOfUsers = null;
+<%_ } _%>
+    }
+
+    @Test
+<%_ if (databaseTypeSql && !reactive) { _%>
+    @Transactional
+<%_ } _%>
+    void getAllPublicUsers()<% if (!reactive) { %> throws Exception<% } %> {
+        // Initialize the database
+        userRepository.<% if (databaseTypeSql && reactive && authenticationTypeOauth2) { %>create<% } else { %>save<% } %><% if (databaseTypeSql && !reactive) { %>AndFlush<% } %>(user)<% if (reactive) { %>.block()<% } %>;
+
+        // Get all the users
+<%_ if (reactive) { _%>
+        webTestClient.get().uri("/api/users?sort=id,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.[?(@.id == <%- primaryKey.typeNumeric ? '%d' : "'%s'" %>)].login", user.getId()).isEqualTo(user.getLogin())
+            .jsonPath("$.[?(@.id == <%- primaryKey.typeNumeric ? '%d' : "'%s'" %>)].keys()", user.getId()).isEqualTo(Set.of("id", "login"))
+  <%_ for (field of user.fields.filter(field => !field.builtIn && field.relatedByOtherEntity)) { _%>
+            .jsonPath("$.[?(@.id == <%- primaryKey.typeNumeric ? '%d' : "'%s'" %>)].<%= field.fieldName %>", user.getId()).isEqualTo(user.get<%= field.propertyJavaBeanName %>())
+  <%_ } _%>
+            .jsonPath("$.[*].email").doesNotHaveJsonPath()
+  <%_ if (!databaseTypeCassandra) { _%>
+            .jsonPath("$.[*].imageUrl").doesNotHaveJsonPath()
+  <%_ } _%>
+            .jsonPath("$.[*].langKey").doesNotHaveJsonPath();
+<%_ } else { _%>
+        restUserMockMvc.perform(get("/api/users<% if (databaseTypeSql) { %>?sort=id,desc<% } %>")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.[?(@.id == <%- primaryKey.typeNumeric ? '%d' : "'%s'" %>)].login", user.getId()).value(user.getLogin()))
+            .andExpect(jsonPath("$.[?(@.id == <%- primaryKey.typeNumeric ? '%d' : "'%s'" %>)].keys()", user.getId()).value(Set.of("id", "login")))
+  <%_ for (field of user.fields.filter(field => !field.builtIn && field.relatedByOtherEntity)) { _%>
+            .andExpect(jsonPath("$.[?(@.id == <%- primaryKey.typeNumeric ? '%d' : "'%s'" %>)].<%= field.fieldName %>", user.getId()).value(user.get<%= field.propertyJavaBeanName %>()))
+  <%_ } _%>
+            .andExpect(jsonPath("$.[*].email").doesNotHaveJsonPath())
+  <%_ if (!databaseTypeCassandra) { _%>
+            .andExpect(jsonPath("$.[*].imageUrl").doesNotHaveJsonPath())
+  <%_ } _%>
+            .andExpect(jsonPath("$.[*].langKey").doesNotHaveJsonPath());
+<%_ } _%>
+    }
+
+<%_ if (databaseTypeSql && !authenticationTypeOauth2) { _%>
+    @Test
+  <%_ if (!reactive) { _%>
+    @Transactional
+  <%_ } _%>
+    void getAllUsersSortedByParameters() throws Exception {
+        // Initialize the database
+        userRepository.<% if (reactive) { %>save<% } else { %>saveAndFlush<% } %>(user)<% if (reactive) { %>.block()<% } %>;
+
+  <%_ if (reactive) { _%>
+            webTestClient.get().uri("/api/users?sort=resetKey,desc").accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isBadRequest();
+            webTestClient.get().uri("/api/users?sort=password,desc").accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isBadRequest();
+            webTestClient.get().uri("/api/users?sort=resetKey,desc&sort=id,desc").accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isBadRequest();
+            webTestClient.get().uri("/api/users?sort=id,desc").accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isOk();
+  <%_ } else { _%>
+            restUserMockMvc.perform(get("/api/users?sort=resetKey,desc").accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+            restUserMockMvc.perform(get("/api/users?sort=password,desc").accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+            restUserMockMvc.perform(get("/api/users?sort=resetKey,desc&sort=id,desc").accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+            restUserMockMvc.perform(get("/api/users?sort=id,desc").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+  <%_ } _%>
+    }
+<%_ } _%>
+}

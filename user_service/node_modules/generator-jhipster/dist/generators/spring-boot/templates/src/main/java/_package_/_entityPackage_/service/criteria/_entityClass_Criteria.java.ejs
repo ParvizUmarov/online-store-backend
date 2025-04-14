@@ -1,0 +1,153 @@
+package <%- entityAbsolutePackage %>.<%_ if(jpaMetamodelFiltering && reactive) { _%>domain<%_ } else { _%>service<%_ } _%>.criteria;
+
+import java.io.Serializable;
+import java.util.Optional;
+import java.util.Objects;
+import java.util.function.BiFunction;
+
+import org.springdoc.core.annotations.ParameterObject;
+import tech.jhipster.service.Criteria;
+<%_ for (const field of fields) {  _%>
+  <%_ if (field.fieldIsEnum === true) { _%>
+import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
+  <%_ } _%>
+<%_ } _%>
+<%_ if (anyFieldIsLocalTime) { _%>
+import java.time.LocalTime;
+<%_ } _%>
+import tech.jhipster.service.filter.*;
+
+/**
+ * Criteria class for the {@link <%- entityAbsoluteClass %>} entity. This class is used
+ * in {@link <%- entityAbsolutePackage %>.web.rest.<%- entityClass %>Resource} to receive all the possible filtering options from
+ * the Http GET request parameters.
+ * For example the following could be a valid request:
+ * {@code /<%- entityApiUrl %>?id.greaterThan=5&attr1.contains=something&attr2.specified=false}
+ * As Spring is unable to properly convert the types, unless specific {@link Filter} class are used, we need to use
+ * fix type specific filters.
+ */
+@ParameterObject
+@SuppressWarnings("common-java:DuplicatedBlocks")
+public class <%- entityClass %>Criteria implements Serializable, Criteria {
+<%_ for (const { type, superType, fieldType } of entityJavaCustomFilters) { _%>
+
+    /**
+     * Class for filtering <%- fieldType %>
+     */
+    public static class <%- type %> extends <%- superType %> {
+
+        public <%- type %>() {}
+
+        public <%- type %>(<%- type %> filter) {
+            super(filter);
+        }
+
+        @Override
+        public <%- type %> copy() {
+            return new <%- type %>(this);
+        }
+
+    }
+<%_ } _%>
+
+    private static final long serialVersionUID = 1L;
+<%_ for (const filterableProperty of entityJavaFilterableProperties) { _%>
+
+    private <%- filterableProperty.propertyJavaFilterType %> <%- filterableProperty.propertyJavaFilterName %>;
+<%_ } _%>
+
+    private Boolean distinct;
+
+    public <%- entityClass %>Criteria() {
+    }
+
+    public <%- entityClass %>Criteria(<%- entityClass %>Criteria other) {
+<%_ for (const { propertyJavaFilterName, propertyJavaFilterJavaBeanName, propertyJavaFilterType } of entityJavaFilterableProperties) { _%>
+        this.<%- propertyJavaFilterName %> = other.optional<%- propertyJavaFilterJavaBeanName %>().map(<%- propertyJavaFilterType %>::copy).orElse(null);
+<%_ } _%>
+        this.distinct = other.distinct;
+    }
+
+    @Override
+    public <%- entityClass %>Criteria copy() {
+        return new <%- entityClass %>Criteria(this);
+    }
+<%_ for (const { propertyJavaFilterName, propertyJavaFilterType, propertyJavaFilterJavaBeanName } of entityJavaFilterableProperties) { _%>
+
+    public <%- propertyJavaFilterType %> get<%- propertyJavaFilterJavaBeanName %>() {
+        return <%- propertyJavaFilterName %>;
+    }
+
+    public Optional<<%- propertyJavaFilterType %>> optional<%- propertyJavaFilterJavaBeanName %>() {
+        return Optional.ofNullable(<%- propertyJavaFilterName %>);
+    }
+
+    public <%- propertyJavaFilterType %> <%- propertyJavaFilterName %>() {
+        if (<%- propertyJavaFilterName %> == null) {
+            set<%- propertyJavaFilterJavaBeanName %>(new <%- propertyJavaFilterType %>());
+        }
+        return <%- propertyJavaFilterName %>;
+    }
+
+    public void set<%- propertyJavaFilterJavaBeanName %>(<%- propertyJavaFilterType %> <%- propertyJavaFilterName %>) {
+        this.<%- propertyJavaFilterName %> = <%- propertyJavaFilterName %>;
+    }
+<%_ } _%>
+
+    public Boolean getDistinct() {
+        return distinct;
+    }
+
+    public Optional<Boolean> optionalDistinct() {
+        return Optional.ofNullable(distinct);
+    }
+
+    public Boolean distinct() {
+        if (distinct == null) {
+            setDistinct(true);
+        }
+        return distinct;
+    }
+
+    public void setDistinct(Boolean distinct) {
+        this.distinct = distinct;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final <%- entityClass %>Criteria that = (<%- entityClass %>Criteria) o;
+        return
+<%_ for (const { propertyJavaFilterName } of entityJavaFilterableProperties) { _%>
+            Objects.equals(<%- propertyJavaFilterName %>, that.<%- propertyJavaFilterName %>) &&
+<%_ } _%>
+            Objects.equals(distinct, that.distinct);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+<%_ for (const { propertyJavaFilterName } of entityJavaFilterableProperties) { _%>
+          <%- propertyJavaFilterName %>,
+<%_ } _%>
+          distinct
+        );
+    }
+
+    // prettier-ignore
+    @Override
+    public String toString() {
+        return "<%- entityClass %>Criteria{" +
+<%_ for (const { propertyJavaFilterName, propertyJavaFilterJavaBeanName } of entityJavaFilterableProperties) { _%>
+            optional<%- propertyJavaFilterJavaBeanName %>().map(f -> "<%- propertyJavaFilterName %>=" + f + ", ").orElse("") +
+<%_ } _%>
+            optionalDistinct().map(f -> "distinct=" + f + ", ").orElse("") +
+        "}";
+    }
+
+}
