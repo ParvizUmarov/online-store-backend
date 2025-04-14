@@ -1,0 +1,15 @@
+{
+  "gateway": {
+    "title": "Ağ geçidi",
+    "routes": {
+      "title": "Geçerli yollar",
+      "url": "URL",
+      "service": "Hizmet",
+      "servers": "Kullanılabilir sunucular",
+      "error": "Uyarı: aktif sunucu bulunamadı!"
+    },
+    "refresh": {
+      "button": "Yenile"
+    }
+  }
+}

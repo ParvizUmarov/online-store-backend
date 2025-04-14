@@ -1,0 +1,11 @@
+{
+  "groups": [
+    {
+      "name": "application",
+      "type": "org.online.store.gateway.config.ApplicationProperties",
+      "sourceType": "org.online.store.gateway.config.ApplicationProperties"
+    }
+  ],
+  "properties": [],
+  "hints": []
+}

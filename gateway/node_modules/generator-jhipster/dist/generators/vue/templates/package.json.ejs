@@ -1,0 +1,123 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+{
+  "name": "<%= dasherizedBaseName %>",
+  "version": "0.0.0",
+  "description": "<%= projectDescription %>",
+  "private": true,
+  "license": "UNLICENSED",
+  "cacheDirectories": [
+    "node_modules"
+  ],
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "<%= nodeDependencies['@fortawesome/fontawesome-svg-core'] %>",
+    "@fortawesome/free-solid-svg-icons": "<%= nodeDependencies['@fortawesome/free-solid-svg-icons'] %>",
+    "@fortawesome/vue-fontawesome": "<%= nodeDependencies['@fortawesome/vue-fontawesome'] %>",
+    "@vue/compat": "<%= nodeDependencies.vue %>",
+    "@vuelidate/core": "<%= nodeDependencies['@vuelidate/core'] %>",
+    "@vuelidate/validators": "<%= nodeDependencies['@vuelidate/validators'] %>",
+    "@vueuse/core": "<%= nodeDependencies['@vueuse/core'] %>",
+    "axios": "<%= nodeDependencies['axios'] %>",
+    "bootstrap": "<%= nodeDependencies['bootstrap'] %>",
+    "bootstrap-vue": "<%= nodeDependencies['bootstrap-vue'] %>",
+<%_ if (!clientThemeNone) { _%>
+    "bootswatch": "<%= nodeDependencies['bootswatch'] %>",
+<%_ } _%>
+    "dayjs": "<%= nodeDependencies['dayjs'] %>",
+<%_ if (communicationSpringWebsocket) { _%>
+    "@stomp/rx-stomp": null,
+    "js-cookie": "<%= nodeDependencies['js-cookie'] %>",
+    "sockjs-client": null,
+    "rxjs": null,
+<%_ } _%>
+    "pinia": "<%= nodeDependencies.pinia %>",
+    "vue": "<%= nodeDependencies['vue'] %>",
+<%_ if (enableTranslation) { _%>
+    "deepmerge": null,
+    "vue-i18n": "<%= nodeDependencies['vue-i18n'] %>",
+<%_ } _%>
+    "vue-router": "<%= nodeDependencies['vue-router'] %>"
+  },
+  "devDependencies": {
+    "@eslint/js": null,
+    "@pinia/testing": "<%= nodeDependencies['@pinia/testing'] %>",
+    "@types/node": "<%= nodeDependencies['@types/node'] %>",
+    "@types/sinon": "<%= nodeDependencies['@types/sinon'] %>",
+    "@tsconfig/node18": null,
+    "@vitejs/plugin-vue": "<%= nodeDependencies['@vitejs/plugin-vue'] %>",
+    "@vitest/coverage-v8": "<%= nodeDependencies.vitest %>",
+    "@vue/test-utils": "<%= nodeDependencies['@vue/test-utils'] %>",
+    "@vue/tsconfig": null,
+    "axios-mock-adapter": "<%= nodeDependencies['axios-mock-adapter'] %>",
+    "autoprefixer": "<%= nodeDependencies['autoprefixer'] %>",
+    "flush-promises": null,
+    "happy-dom": "<%= nodeDependencies['happy-dom'] %>",
+    "numeral": "<%= nodeDependencies['numeral'] %>",
+    "postcss-import": "<%= nodeDependencies['postcss-import'] %>",
+    "postcss-url": "<%= nodeDependencies['postcss-url'] %>",
+<%_ if (cypressTests) { _%>
+    "cypress": "<%= nodeDependencies['cypress'] %>",
+<%_ } _%>
+    "rimraf": "<%= nodeDependencies['rimraf'] %>",
+    "sass": "<%= nodeDependencies['sass'] %>",
+    "sinon": "<%= nodeDependencies['sinon'] %>",
+    "swagger-ui-dist": "<%= nodeDependencies['swagger-ui-dist'] %>",
+    "eslint": "<%= nodeDependencies['eslint'] %>",
+    "eslint-config-prettier": null,
+    "eslint-plugin-prettier": "<%= nodeDependencies['eslint-plugin-prettier'] %>",
+    "eslint-plugin-vue": "<%= nodeDependencies['eslint-plugin-vue'] %>",
+    "typescript": "<%= nodeDependencies['typescript'] %>",
+    "typescript-eslint": null,
+    "vite": null,
+    "vitest": "<%= nodeDependencies.vitest %>",
+    "vite-plugin-static-copy": null,
+    "vitest-sonar-reporter": "<%= nodeDependencies['vitest-sonar-reporter'] %>"
+  },
+  "engines": {
+    "node": ">=<%= nodeVersion %>"
+  },
+  "config": {
+    "default_environment": "prod"
+  },
+  "scripts": {
+    "build": "<%= clientPackageManager %> run webapp:prod --",
+    "build-watch": "concurrently 'npm run webapp:build:dev -- --watch'<% if(!skipServer) { %> npm:backend:start<% } %>",
+    "cleanup": "rimraf <%= this.relativeDir(clientRootDir, temporaryDir) %>",
+    "clean-www": "rimraf <%= this.relativeDir(clientRootDir, clientDistDir) %>",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "serve": "<%= clientPackageManager %> run start --",
+    "start": "<%= clientPackageManager %> run webapp:dev --",
+    "start-tls": "<%= clientPackageManager %> run webapp:dev -- --env.tls",
+    "pretest": "<%= clientPackageManager %> run lint",
+    "test": "<%= clientPackageManager %> run vitest-run --",
+    "test:watch": "<%= clientPackageManager %> run vitest",
+    "vitest-run": "vitest --run --coverage",
+    "vitest": "vitest",
+    "watch": "concurrently npm:start<% if(!skipServer) { %> npm:backend:start<% } %>",
+    "webapp:build": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:dev --",
+    "webapp:prod": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:prod --",
+    "webapp:test": "<%= clientPackageManager %> run test --"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
