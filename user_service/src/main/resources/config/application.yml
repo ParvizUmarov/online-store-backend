@@ -99,12 +99,13 @@ management:
 
 spring:
   application:
-    name: userService
+    name: userservice
   cloud:
     consul:
       host: localhost
       port: 8500
       discovery:
+        enabled: true
         healthCheckPath: /management/health
         instanceId: userservice:${spring.application.instance-id:${random.value}}
         service-name: userservice

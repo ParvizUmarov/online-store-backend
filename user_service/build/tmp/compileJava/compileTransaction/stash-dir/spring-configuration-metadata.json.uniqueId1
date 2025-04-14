@@ -16,7 +16,8 @@
     {
       "name": "application.liquibase.async-start",
       "type": "java.lang.Boolean",
-      "sourceType": "org.online.store.user.service.config.ApplicationProperties$Liquibase"
+      "sourceType": "org.online.store.user.service.config.ApplicationProperties$Liquibase",
+      "defaultValue": true
     }
   ],
   "hints": []

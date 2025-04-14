@@ -31,11 +31,7 @@ reactive:
         enabled: true
     client:
       config:
-        userService:
-          url: http://localhost:8081
         default:
-          loggerLevel: full
-          decode404: false
           connectTimeout: 5000
           readTimeout: 5000
 management:
