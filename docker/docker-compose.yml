@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: online-store-dbs
+    environment:
+      POSTGRES_USER: parviz
+      POSTGRES_PASSWORD: qwerty
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  redis:
+    container_name: online-store-redis-db
+    image: redis:7.0.12
+    ports:
+      - "6580:6379"
+
+  gateway:
+    build:
+      context: ../gateway
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - item-service
+      - warehouse-service
+      - cash-operation-service
+
+  user-service:
+    build:
+      context: ../user_service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+
+  item-service:
+    build:
+      context: ../item_service
+    container_name: item-service
+    ports:
+      - "8082:8082"
+
+  warehouse-service:
+    build:
+      context: ../warehouse_service
+    container_name: warehouse-service
+    ports:
+      - "8083:8083"
+
+  cash-operation-service:
+    build:
+      context: ../cash_opearation_service
+    container_name: cash-operation-service
+    ports:
+      - "8084:8084"

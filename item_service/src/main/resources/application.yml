@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: item.service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/item_db
+    username: parviz
+    password: qwerty
+
+server:
+  port: 8082

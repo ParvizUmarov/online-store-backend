@@ -1,14 +1,13 @@
-package org.online.store.gateway;
+package org.online.store.user.service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GatewayApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GatewayApplication.class, args);
-
+		SpringApplication.run(Application.class, args);
 	}
 
 }

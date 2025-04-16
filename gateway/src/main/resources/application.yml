@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: gateway
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/user_db
+    username: parviz
+    password: qwerty

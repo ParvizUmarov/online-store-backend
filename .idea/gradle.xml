@@ -13,23 +13,11 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <compositeConfiguration>
-          <compositeBuild compositeDefinitionSource="SCRIPT">
-            <builds>
-              <build path="$PROJECT_DIR$/user_service/buildSrc" name="buildSrc">
-                <projects>
-                  <project path="$PROJECT_DIR$/user_service/buildSrc" />
-                </projects>
-              </build>
-            </builds>
-          </compositeBuild>
-        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$/user_service" />
         <option name="gradleJvm" value="openjdk-21" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/user_service" />
-            <option value="$PROJECT_DIR$/user_service/buildSrc" />
           </set>
         </option>
       </GradleProjectSettings>

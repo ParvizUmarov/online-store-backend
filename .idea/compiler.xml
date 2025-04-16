@@ -7,7 +7,7 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/Desktop/barber(1)/barber/gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.36/5a30490a6e14977d97d9c73c924c1f1b5311ea95/lombok-1.18.36.jar" />
         </processorPath>
-        <module name="gateway.main" />
+        <module name="user.service.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -15,6 +15,11 @@
       <module name="gateway.buildSrc.main" target="21" />
       <module name="gateway.buildSrc.test" target="21" />
       <module name="user-service" target="17" />
+      <module name="user-service.buildSrc" target="21" />
+      <module name="user-service.buildSrc.main" target="21" />
+      <module name="user-service.buildSrc.test" target="21" />
+      <module name="user-service.main" target="17" />
+      <module name="user-service.test" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: warehouse.service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/warehouse_db
+    username: parviz
+    password: qwerty
+
+server:
+  port: 8083
