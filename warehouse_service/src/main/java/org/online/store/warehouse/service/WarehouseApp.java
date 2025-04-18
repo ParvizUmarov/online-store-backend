@@ -1,13 +1,13 @@
-package org.online.store.cash.operation.service;
+package org.online.store.warehouse.service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
+public class WarehouseApp {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(WarehouseApp.class, args);
 	}
 
 }

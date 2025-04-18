@@ -3,7 +3,7 @@ spring:
     name: cash.operation.service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres:5432/cash_operation_db
+    url: jdbc:postgresql://localhost:5432/cash_operation_db
     username: parviz
     password: qwerty
 

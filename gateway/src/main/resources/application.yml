@@ -3,6 +3,15 @@ spring:
     name: gateway
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres:5432/user_db
+    url: jdbc:postgresql://localhost:5432/user_db
     username: parviz
     password: qwerty
+
+service:
+  user: http://localhost:8081
+
+feign:
+  client:
+    config:
+      user-service:
+        url: http://localhost:8081

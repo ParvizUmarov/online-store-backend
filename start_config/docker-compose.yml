@@ -36,6 +36,7 @@ services:
     container_name: user-service
     ports:
       - "8081:8081"
+      - "9090:9090"
 
   item-service:
     build:
@@ -53,7 +54,7 @@ services:
 
   cash-operation-service:
     build:
-      context: ../cash_opearation_service
+      context: ../cash_operation_service
     container_name: cash-operation-service
     ports:
       - "8084:8084"
