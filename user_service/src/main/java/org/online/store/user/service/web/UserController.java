@@ -20,6 +20,4 @@ public class UserController {
     public ResponseEntity<UserDto> getUser() {
         return ResponseEntity.ok(userService.getHello());
     }
-
-
 }

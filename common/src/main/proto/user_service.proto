@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.online.store.grpc";
+option java_outer_classname = "UserServiceProto";
+
+service UserService {
+  rpc GetHello (Empty) returns (UserDto);
+}
+
+message Empty {}
+
+message UserDto {
+  int64 id = 1;
+  string username = 2;
+  string email = 3;
+}

@@ -1,25 +1,19 @@
+
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.google.protobuf' version '0.9.4'
 }
 
 group = 'org.online.store.common'
-version = '1.0-SNAPSHOT'
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-
-            groupId = 'org.online.store'
-            artifactId = 'common'
-            version = '0.0.1-SNAPSHOT'
-        }
-    }
-}
+version = '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
+}
+
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 dependencies {
@@ -28,8 +22,59 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // gRPC
+    implementation 'io.grpc:grpc-netty-shaded:1.64.0'
+    implementation 'io.grpc:grpc-protobuf:1.64.0'
+    implementation 'io.grpc:grpc-stub:1.64.0'
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+
+    // Protobuf
+    implementation 'com.google.protobuf:protobuf-java:4.28.2'
 }
 
 test {
     useJUnitPlatform()
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.21.7"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.50.2'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {}
+            }
+            task.builtins {
+                java {}
+            }
+        }
+    }
+}
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }

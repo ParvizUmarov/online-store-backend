@@ -7,11 +7,8 @@ spring:
     username: parviz
     password: qwerty
 
-service:
-  user: http://localhost:8081
-
-feign:
+grpc:
   client:
-    config:
-      user-service:
-        url: http://localhost:8081
+    user-service:
+      address: static://localhost:9090
+      negotiationType: PLAINTEXT

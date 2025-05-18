@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cash.operation.service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cash.operation.service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/gateway.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/item.service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/item.service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/online-store.iml" filepath="$PROJECT_DIR$/.idea/online-store.iml" />
